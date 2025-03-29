@@ -55,6 +55,30 @@ __device__ inline void foreach (
 
 template <class Func>
 __device__ inline void foreach (
+    mtk::wmma::mma::fragment<nvcuda::wmma::matrix_a, 16, 8, 16, nv_bfloat16,
+                             nvcuda::wmma::row_major> &frag,
+    Func func) {
+  const unsigned col_block_id = mtk::wmma::detail::common::get_lane_id() % 4;
+  const unsigned row_block_id = mtk::wmma::detail::common::get_lane_id() / 4;
+
+  for (unsigned i = 0; i < 2; i++) {
+    for (unsigned j = 0; j < 2; j++) {
+      const auto col = i * 8 + col_block_id * 2;
+      const auto row = row_block_id + j * 8;
+      {
+        const unsigned frag_index_list[1] = {(i * 4 + j * 2 + 0)};
+        func(frag_index_list, 1, row * 16 + (col + 0));
+      }
+      {
+        const unsigned frag_index_list[1] = {(i * 4 + j * 2 + 1)};
+        func(frag_index_list, 1, row * 16 + (col + 1));
+      }
+    }
+  }
+}
+
+template <class Func>
+__device__ inline void foreach (
     mtk::wmma::mma::fragment<nvcuda::wmma::matrix_b, 16, 8, 16, half,
                              nvcuda::wmma::col_major> &frag,
     Func func) {
