@@ -18,6 +18,15 @@ class fragment<nvcuda::wmma::accumulator, 16, 8, 16, float>
 template <>
 class fragment<nvcuda::wmma::accumulator, 16, 8, 16, half>
     : public __frag_base<half, 4> {};
+template <>
+class fragment<nvcuda::wmma::matrix_a, 16, 8, 16, nv_bfloat16, nvcuda::wmma::row_major>
+    : public __frag_base<nv_bfloat16, 8> {};
+template <>
+class fragment<nvcuda::wmma::matrix_b, 16, 8, 16, nv_bfloat16, nvcuda::wmma::col_major>
+    : public __frag_base<nv_bfloat16, 4> {};
+template <>
+class fragment<nvcuda::wmma::accumulator, 16, 8, 16, nv_bfloat16>
+    : public __frag_base<nv_bfloat16, 4> {};
 
 // foreach
 template <class Func>
